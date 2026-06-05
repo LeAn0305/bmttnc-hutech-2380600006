@@ -1,17 +1,23 @@
 class PlayFairCipher:
     def __init__(self) -> None:
         pass
-
-    def _init__(self):
-        pass
-
+    
+    def clean_text(self, text):
+        text = text.upper().replace("J", "I")
+        return "".join([char for char in text if char.isalpha()])
+    
     def create_playfair_matrix(self, key):
-        key = key.replace("J", "I")  # Chuyển J thành I trong khóa
-        key = key.upper()
-        key_set = set(key)
+        key = self.clean_text(key)
+
+        unique_key = ""
+        for letter in key:
+            if letter not in unique_key:
+                unique_key += letter
+
         alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ"
-        remaining_letters = [letter for letter in alphabet if letter not in key_set]
-        matrix = list(key)
+        remaining_letters = [letter for letter in alphabet if letter not in unique_key]
+
+        matrix = list(unique_key)
 
         for letter in remaining_letters:
             matrix.append(letter)
@@ -28,8 +34,7 @@ class PlayFairCipher:
                     return row, col
 
     def playfair_encrypt(self, plain_text, matrix):
-        plain_text = plain_text.replace("J", "I")
-        plain_text = plain_text.upper()
+        plain_text = self.clean_text(plain_text)
         encrypted_text = ""
 
         for i in range(0, len(plain_text), 2):
@@ -51,9 +56,8 @@ class PlayFairCipher:
         return encrypted_text
 
     def playfair_decrypt(self, cipher_text, matrix):
-        cipher_text = cipher_text.upper()
+        cipher_text = self.clean_text(cipher_text)
         decrypted_text = ""
-        decrypted_text1 = ""
 
         for i in range(0, len(cipher_text), 2):
             pair = cipher_text[i:i+2]
