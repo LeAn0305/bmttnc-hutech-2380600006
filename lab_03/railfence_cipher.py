@@ -47,6 +47,16 @@ class MyApp(QMainWindow):
         if key < 2:
             self.show_message(QMessageBox.Warning, "Ràng buộc sai", "Số hàng (Key) phải là số nguyên lớn hơn hoặc bằng 2!")
             return
+        
+        # CHẶN LỖI LOGIC: Key lớn hơn hoặc bằng độ dài văn bản
+        if key >= len(plain_text):
+            self.show_message(
+                QMessageBox.Warning, 
+                "Ràng buộc sai", 
+                f"Số hàng (Key = {key}) không được lớn hơn hoặc bằng độ dài văn bản (Độ dài hiện tại = {len(plain_text)}).\n"
+                "Nếu không, văn bản sẽ không được xáo trộn!"
+            )
+            return
         # ==================================================================
 
         url = "http://127.0.0.1:5000/api/railfence/encrypt"
