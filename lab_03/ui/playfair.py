@@ -9,8 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-import os
-os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = '../platforms'
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -63,6 +62,15 @@ class Ui_MainWindow(object):
         self.btn_Decrypt = QtWidgets.QPushButton(self.centralwidget)
         self.btn_Decrypt.setGeometry(QtCore.QRect(710, 520, 101, 31))
         self.btn_Decrypt.setObjectName("btn_Decrypt")
+        self.label = QtWidgets.QLabel(self.centralwidget)
+        self.label.setGeometry(QtCore.QRect(350, 520, 271, 21))
+        font = QtGui.QFont()
+        font.setFamily("Times New Roman")
+        font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label.setFont(font)
+        self.label.setObjectName("label")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 900, 21))
@@ -84,6 +92,7 @@ class Ui_MainWindow(object):
         self.label_CipherText.setText(_translate("MainWindow", "CipherText :"))
         self.btn_Encrypt.setText(_translate("MainWindow", "Encrypt"))
         self.btn_Decrypt.setText(_translate("MainWindow", "Decrypt"))
+        self.label.setText(_translate("MainWindow", "Lê Tấn Bình An - 2380600006"))
 
 
 if __name__ == "__main__":
