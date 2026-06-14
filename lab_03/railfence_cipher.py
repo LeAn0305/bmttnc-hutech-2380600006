@@ -1,7 +1,13 @@
+import re
 import sys
+
 import requests
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 from ui.railfence import Ui_MainWindow
+
+
+def is_integer(text):
+    return re.fullmatch(r"-?\d+", text) is not None
 
 
 class MyApp(QMainWindow):
@@ -14,7 +20,6 @@ class MyApp(QMainWindow):
         self.ui.btn_Decrypt.clicked.connect(self.call_api_decrypt)
 
     def show_message(self, icon, title, text):
-        """Hàm tiện ích hiển thị nhanh pop-up thông báo"""
         msg = QMessageBox()
         msg.setIcon(icon)
         msg.setWindowTitle(title)
@@ -23,46 +28,46 @@ class MyApp(QMainWindow):
         msg.exec_()
 
     def call_api_encrypt(self):
-        # Lấy dữ liệu và xóa khoảng trắng thừa
-        plain_text = self.ui.txt_PlainText.toPlainText().strip()
-        key_input = self.ui.txt_Key.text().strip()
+        plain_text = self.ui.txt_PlainText.toPlainText()
+        key_input = self.ui.txt_Key.text()
 
-        # ================= RÀNG BUỘC ĐẦU VÀO (VALIDATION) =================
-        if not plain_text:
-            self.show_message(QMessageBox.Warning, "Lỗi nhập liệu", "Vui lòng nhập văn bản cần mã hóa (Plain Text)!")
-            return
-
-        if not key_input:
-            self.show_message(QMessageBox.Warning, "Lỗi nhập liệu", "Vui lòng nhập Key (Số hàng)!")
-            return
-
-        try:
-            # Ép kiểu sang int để kiểm tra xem có phải số nguyên không
-            key = int(key_input)
-        except ValueError:
-            self.show_message(QMessageBox.Warning, "Ràng buộc sai", "Key của thuật toán Rail Fence bắt buộc phải là một số nguyên!")
-            return
-
-        # Kiểm tra điều kiện số hàng phải >= 2
-        if key < 2:
-            self.show_message(QMessageBox.Warning, "Ràng buộc sai", "Số hàng (Key) phải là số nguyên lớn hơn hoặc bằng 2!")
-            return
-        
-        # CHẶN LỖI LOGIC: Key lớn hơn hoặc bằng độ dài văn bản
-        if key >= len(plain_text):
+        if not plain_text.strip():
             self.show_message(
-                QMessageBox.Warning, 
-                "Ràng buộc sai", 
-                f"Số hàng (Key = {key}) không được lớn hơn hoặc bằng độ dài văn bản (Độ dài hiện tại = {len(plain_text)}).\n"
-                "Nếu không, văn bản sẽ không được xáo trộn!"
+                QMessageBox.Warning,
+                "Lỗi nhập liệu",
+                "PlainText của RailFence không được để trống nha.",
             )
             return
-        # ==================================================================
+
+        if not is_integer(key_input):
+            self.show_message(
+                QMessageBox.Warning,
+                "Lỗi nhập liệu",
+                "Key của RailFence phải là số nguyên nha.",
+            )
+            return
+        key = int(key_input)
+
+        if key < 2:
+            self.show_message(
+                QMessageBox.Warning,
+                "Lỗi nhập liệu",
+                "Key của RailFence phải lớn hơn hoặc bằng 2 nha.",
+            )
+            return
+
+        if key > len(plain_text):
+            self.show_message(
+                QMessageBox.Warning,
+                "Lỗi nhập liệu",
+                "Key của RailFence không được lớn hơn độ dài PlainText nha.",
+            )
+            return
 
         url = "http://127.0.0.1:5000/api/railfence/encrypt"
         payload = {
             "plain_text": plain_text,
-            "key": key # Gửi đi dưới dạng số nguyên int đã chuẩn hóa
+            "key": key,
         }
 
         try:
@@ -79,34 +84,46 @@ class MyApp(QMainWindow):
             self.show_message(QMessageBox.Critical, "Lỗi kết nối", f"Không thể kết nối đến Server API!\nChi tiết: {e}")
 
     def call_api_decrypt(self):
-        # Lấy dữ liệu và xóa khoảng trắng thừa
-        cipher_text = self.ui.txt_CipherText.toPlainText().strip()
-        key_input = self.ui.txt_Key.text().strip()
+        cipher_text = self.ui.txt_CipherText.toPlainText()
+        key_input = self.ui.txt_Key.text()
 
-        # ================= RÀNG BUỘC ĐẦU VÀO (VALIDATION) =================
-        if not cipher_text:
-            self.show_message(QMessageBox.Warning, "Lỗi nhập liệu", "Vui lòng nhập văn bản cần giải mã (Cipher Text)!")
+        if not cipher_text.strip():
+            self.show_message(
+                QMessageBox.Warning,
+                "Lỗi nhập liệu",
+                "CipherText của RailFence không được để trống nha.",
+            )
             return
 
-        if not key_input:
-            self.show_message(QMessageBox.Warning, "Lỗi nhập liệu", "Vui lòng nhập Key (Số hàng)!")
+        if not is_integer(key_input):
+            self.show_message(
+                QMessageBox.Warning,
+                "Lỗi nhập liệu",
+                "Key của RailFence phải là số nguyên nha.",
+            )
             return
-
-        try:
-            key = int(key_input)
-        except ValueError:
-            self.show_message(QMessageBox.Warning, "Ràng buộc sai", "Key của thuật toán Rail Fence bắt buộc phải là một số nguyên!")
-            return
+        key = int(key_input)
 
         if key < 2:
-            self.show_message(QMessageBox.Warning, "Ràng buộc sai", "Số hàng (Key) phải là số nguyên lớn hơn hoặc bằng 2!")
+            self.show_message(
+                QMessageBox.Warning,
+                "Lỗi nhập liệu",
+                "Key của RailFence phải lớn hơn hoặc bằng 2 nha.",
+            )
             return
-        # ==================================================================
+
+        if key > len(cipher_text):
+            self.show_message(
+                QMessageBox.Warning,
+                "Lỗi nhập liệu",
+                "Key của RailFence không được lớn hơn độ dài CipherText nha.",
+            )
+            return
 
         url = "http://127.0.0.1:5000/api/railfence/decrypt"
         payload = {
             "cipher_text": cipher_text,
-            "key": key # Gửi đi dưới dạng số nguyên int đã chuẩn hóa
+            "key": key,
         }
 
         try:
